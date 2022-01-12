@@ -2,11 +2,10 @@ package bot
 
 import (
 	"math/rand"
+	"strings"
 	"time"
 
-	"github.com/james-bowman/nlp"
-	"github.com/james-bowman/nlp/measures/pairwise"
-	"gonum.org/v1/gonum/mat"
+	"github.com/victorvbello/golang-chatbot/languageprocessing"
 )
 
 func randomNumber(min, max int) int {
@@ -63,41 +62,13 @@ func (a *AgentCase) Greeting() string {
 }
 
 func (a *AgentCase) Reply(query string) string {
-
-	var result string
-
-	vectoriser := nlp.NewCountVectoriser(" ")
-	transformer := nlp.NewTfidfTransformer()
-
-	reducer := nlp.NewTruncatedSVD(4)
-
-	matrix, _ := vectoriser.FitTransform(a.knowledgeCorpus...)
-	matrix, _ = transformer.FitTransform(matrix)
-	lsi, _ := reducer.FitTransform(matrix)
-
-	matrix, _ = vectoriser.Transform(query)
-	matrix, _ = transformer.Transform(matrix)
-	queryVector, _ := reducer.Transform(matrix)
-
-	highestSimilarity := -1.0
-	var matched int
-	_, docs := lsi.Dims()
-	for i := 0; i < docs; i++ {
-		similarity := pairwise.CosineSimilarity(queryVector.(mat.ColViewer).ColView(0), lsi.(mat.ColViewer).ColView(i))
-		if similarity > highestSimilarity {
-			matched = i
-			highestSimilarity = similarity
-		}
+	lp := languageprocessing.LanguageProcessing{
+		KnowledgeBase:   a.knowledgeBase,
+		KnowledgeCorpus: a.knowledgeCorpus,
 	}
 
-	if highestSimilarity == -1 {
-		result = "I don't know the answer to that one."
-	} else {
-		result = a.knowledgeBase[a.knowledgeCorpus[matched]]
-	}
-
+	result := "<SIMPLE> " + lp.Simple(query) + " <COMPLEX> " + lp.Complex(query)
 	return result
-
 }
 
 func (a *AgentCase) initializeIntelligence() {
@@ -112,11 +83,12 @@ func (a *AgentCase) initializeIntelligence() {
 		"perform routing web app register routes define routes":                                   "You can implement client-side routing in your web application using the IsoKit Router preventing the dreaded full page reload.",
 		"render templates perform template rendering":                                             "Use template sets, a set of project templates that are persisted in memory and are available on both the server-side and the client-side",
 		"cogs reusable components does it isomorphic go offer anything react-like":                "Cogs are reuseable components in an Isomorphic Go web application.",
+		"cogs reusable components does it isomorphic go offer anything react-like two":            "Cogs are reuseable components in an Isomorphic Go web application. two",
 	}
 
 	a.knowledgeCorpus = make([]string, 1)
 	for k, _ := range a.knowledgeBase {
-		a.knowledgeCorpus = append(a.knowledgeCorpus, k)
+		a.knowledgeCorpus = append(a.knowledgeCorpus, strings.ToLower(k))
 	}
 
 	a.sampleQuestions = []string{
