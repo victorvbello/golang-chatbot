@@ -9,6 +9,8 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+const DEFAULT_RESPONSE = "I don't know the answer to that one."
+
 type pairknowledge struct {
 	Key   string
 	Value int
@@ -50,6 +52,10 @@ func (lp *LanguageProcessing) Simple(query string) string {
 	}
 	sort.Sort(sort.Reverse(kl))
 
+	if len(kl) == 0 {
+		return DEFAULT_RESPONSE
+	}
+
 	mK := kl[0].Key
 
 	result = lp.KnowledgeBase[mK]
@@ -86,10 +92,10 @@ func (lp *LanguageProcessing) Complex(query string) string {
 	}
 
 	if highestSimilarity == -1 {
-		result = "I don't know the answer to that one."
-	} else {
-		result = lp.KnowledgeBase[lp.KnowledgeCorpus[matched]]
+		return DEFAULT_RESPONSE
 	}
+
+	result = lp.KnowledgeBase[lp.KnowledgeCorpus[matched]]
 
 	return result
 }
