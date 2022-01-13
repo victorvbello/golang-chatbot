@@ -54,20 +54,21 @@ func (a *AgentCase) SetThumbnailPath(thumbnailPath string) {
 }
 
 func (a *AgentCase) Greeting() string {
-
 	sampleQuestionIndex := randomNumber(0, len(a.sampleQuestions))
 	greeting := "Hi there! I'm Case. You can ask me a question on Isomorphic Go. Such as...\"" + a.sampleQuestions[sampleQuestionIndex] + "\""
 	return greeting
-
 }
 
 func (a *AgentCase) Reply(query string) string {
-	lp := languageprocessing.LanguageProcessing{
+	lp := languageprocessing.LanguageKnowledge{
 		KnowledgeBase:   a.knowledgeBase,
 		KnowledgeCorpus: a.knowledgeCorpus,
 	}
 
-	result := "<SIMPLE> " + lp.Simple(query) + " <COMPLEX> " + lp.Complex(query)
+	simpleAnswer := languageprocessing.GetAnswer(query, &languageprocessing.SiplePorcessor{LanguageKnowledge: lp})
+	ComplexAnswer := languageprocessing.GetAnswer(query, &languageprocessing.ComplexPorcessor{LanguageKnowledge: lp})
+
+	result := "<SIMPLE> " + simpleAnswer + " <COMPLEX> " + ComplexAnswer
 	return result
 }
 
