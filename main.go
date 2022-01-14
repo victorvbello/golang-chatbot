@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -21,6 +22,8 @@ func main() {
 	r.Handle("/ws", chat.ServeWs(hub))
 
 	http.Handle("/", r)
+
+	log.Print("Init")
 
 	http.ListenAndServe(":"+WEB_SERVER_PORT, nil)
 }

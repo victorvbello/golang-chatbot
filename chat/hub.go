@@ -5,6 +5,8 @@
 package chat
 
 import (
+	"log"
+
 	"github.com/victorvbello/golang-chatbot/bot"
 )
 
@@ -54,16 +56,19 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.register:
+			log.Printf("Client-Register Client: %p", client)
 			h.clients[client] = true
 			greeting := h.chatbot.Greeting()
 			h.SendMessage(client, []byte(greeting))
 
 		case client := <-h.unregister:
+			log.Printf("Client-Unregister Client: %p", client)
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
 				close(client.send)
 			}
 		case clientmsg := <-h.broadcastmsg:
+			log.Printf("Client-Query Client: %p, Msg: %s", clientmsg.client, clientmsg.message)
 			client := clientmsg.client
 			reply := h.chatbot.Reply(string(clientmsg.message))
 			h.SendMessage(client, []byte(reply))

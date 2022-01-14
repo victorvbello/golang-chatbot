@@ -101,6 +101,7 @@ func (c *Client) writePump() {
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
+			log.Printf("Response Client: %p, Msg: %s", c, message)
 
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
